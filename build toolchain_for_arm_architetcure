@@ -29,9 +29,10 @@ Step 1.2 Configure and Build
 
 We chose to configure the tool to be installed in a local directory inside our home directory.
 
-cd ~/src/RaspberryPi/toolchain/crosstool-ng-1.17.0
-mkdir -p ~/local/crosstool-ng
-./configure –prefix=/home/ibanez/local/crosstool-ng
+./bootstrap
+./configure --enable-local
+make -j`nproc`
+
 to get this to work, we had to install the following Ubuntu packages (most of which were listed in Andrew’s recipe),
 
 bison
@@ -43,122 +44,40 @@ automake
 libtool
 The whole is done with the command:
 
-sudo aptitude install bison cvs flex gperf texinfo automake libtool
+sudo install install bison cvs flex gperf texinfo automake libtool
 then we can do
 
-make
-make install
-and add to the PATH the bin directory where crosstool-ng was installed:
+Configure the build tool
+./ct-ng list-samples command shows the pre defined configurations for different setups (arch: armv7, armv8, aarch64 etc., library : uClibc, libc etc.) for different platforms.
 
-export PATH=$PATH:/home/ibanez/local/crosstool-ng/bin/
-In some cases, it might be necessary to unset the LD_LIBRARY_PATH,
-to prevent the toolchain from grabbing other shared libraries from the host machine:
+Let’s generate toolchain (64bit) for ARMv8 architecture and libc library. ct-ng has pre defined configuration for RPI3 Model B.
 
-unset LD_LIBRARY_PATH
+./ct-ng aarch64-rpi3-linux-gnu
+By default the standard library is glibc.
 
-Step 1.3 Build Raspberry Toolchain
+./ct-ng menuconfig
+In Paths and misc options, change Maximum log level to see to DEBUG.
+In Operating system, select Version of Linux as 4.19.105 as we are going to use this version of Linux in the subsequent tutorials.
+In Debug facilites, disable all options for now as it takes forever to compile.
+Build toolchain
+./ct-ng build
+Now the toolchain is installed in ~/x-tools directory. Add this $HOME/x-tools/aarch64-rpi3-linux-gnu/bin/ to PATH env varibale in .bashrc so that it can be detected for compiling the binaries.
 
-Create a staging directory. This is a temporary directory where the toolchain will be configured and built, but it is not its final installation place.
+echo 'export PATH=$PATH:$HOME/x-tools/aarch64-rpi3-linux-gnu/bin/' >> ~/.bashrc
+source ~/.bashrc
+Test the toolchain
+Write a sample C program to cross compile with toolchain
 
-mkdir -p ~/src/RaspberryPi/staging
-cd ~/src/RaspberryPi/staging/
-ct-ng  menuconfig
+file : dummy.c
 
-Go into the option “Paths and misc options”
-Enable the option “Try features marked as EXPERIMENTAL”
+int main(void)
+{       
+        return 0;
+}       
+Compile the program with cross toolchain
+aarch64-rpi3-linux-gnu-gcc dummy.c -o dummy
+You shouldn’t see any error or warnings.
 
-In the option “Prefix Directory (NEW)”, one can set the actual destination directory where the toolchain will be installed.
-
-In this case we choose to install in ${HOME}/local/x-tools/${CT_TARGET}.
-Others may prefer /opt/cross/x-tools/${CT_TARGET}, for example.
-
-After you select < Ok >
-Select the < Exit > option to go back to the main menu
-There, select “Target options”.
-Change the Target architecture to arm.
-Leave Endianness set to Little endian and
-Bitness set to 32-bit.
-
-Use again the < Exit > option to go back to the main menu
-Select “Operating System”
-There, change the “Target OS” option from (bare-metal)
-
-to the option “linux”
-Take the <Select> option
-Use the < Exit > option to get back to the main menu
-Select “Binary utilities”
-
-Select “binutils version”
-Take the most recent version that is not marked as EXPERIMENTAL.
-In our case, that was version 2.21.1a
-Go back to the main menu
-Select “C compiler”
-
-Enable the Show Linaro versions (EXPERIMENTAL) option.
-
-Here we selected the “linaro-4.7-2012.10 (EXPERIMENTAL) ”
-This is a bit newer than the version “linaro-4.6-2012.04 (EXPERIMENTAL)”
-
-Select that option.
-Exist the configuration and
-Save the changes
-
-
-If you want to cross-compile code that used C++11 futures/promises,
-then gcc needs to be build with the flag
-
- –with-arch=armv6.
-
-To do this, use the command
-
-            ct-ng menuconfig,
-
-and go to the item:
-
-       Target options -> Architecture level
-
-and set it to “armv6” (without quotes),
-
-then you will be able to cross compile code that uses futures/promises.
-
- 
-
-Thanks Scott !
-
-Then, start the build process by typing
-
-ct-ng  build
-
-
-When the build process finishes, we end up with the toolchain installed in the “prefix” directory.
-In our case: ${HOME}/local/x-tools/${CT_TARGET}
-More specifically:
-/home/ibanez/local/x-tools/arm-unknown-linux-gnueabi
-Where we will find the following collection of executables in the “bin” directory:
-
-We now add this directory to the PATH:
-export PATH=$PATH:/home/ibanez/local/x-tools/arm-unknown-linux-gnueabi/bin
-We can then test the toolchain with a “hello world” small C program.
-Compiling it locally as “helloworld” (in “aleph” which is the name of our Ubuntu Laptop).
-Then copying it into the Raspberry Pi
-and finally running it there
-
-Step 1.4 Build the C++ compiler in the toolchain
-
-By default, our process above only built the C compiler.
-
-We are now going to build the C++ compiler as well.
-
-To build the C++ compiler we do the following:
-
-We go back to the staging directory:
-/home/ibanez/src/RaspberryPi/staging
-and run the configuration process
-ct-ng menuconfig
-We go into the “C compiler” option
-
-Enable the option “C++”
-Save and Exit
-and type again
-“ct-ng  build”
-to build the toolchain.
+Check the binary architecture
+file dummy
+You should see output similar to the following. The output must have words ARM aarch64 and ld-linux-aarch64.so.1.
