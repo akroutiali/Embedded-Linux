@@ -1,0 +1,8 @@
+-Download  uboot repository
+
+$ git clone git://git.denx.de/u-boot.git # v2021.01-rc2-121-g5b8991c667f7
+
+-Compile u-boot using the compiled toolchain  aarch64-rpi3-linux-gnu-
+$ cd u-boot
+$ make ARCH=arm CROSS_COMPILE=aarch64-rpi3-linux-gnu- rpi_3_b_plus_defconfig
+$ make ARCH=arm CROSS_COMPILE=aarch64-rpi3-linux-gnu- -j$(nproc)
