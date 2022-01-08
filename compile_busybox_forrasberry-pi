@@ -1,0 +1,21 @@
+*get the busybox source
+
+git clone git://busybox.net/busybox.git
+cd busybox
+
+*Change configuration
+make menuconfig
+Build busybox statically (without shared liraries) by enabling Settings -> Build static binary (no shared libraries)
+Add cross compiler prefix (aarch64-rpi3-linux-gnu-) by going into Settings -> Cross compiler prefix
+
+*Compile the busybox
+export PATH=$PATH:~/x-tools/aarch64-rpi3-linux-gnu/bin/
+make -j`nproc`
+Install the minimal filesystem
+make install
+This will install the minimal root filesystem to the path ~/rpi3/nfs. Verify the content with following command.
+
+ls ./_install
+The list should be similar to the following.
+
+bin  linuxrc  sbin  usr
