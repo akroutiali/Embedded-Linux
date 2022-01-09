@@ -1,0 +1,5 @@
+$ git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git # v5.10-rc4-368-g27bba9c532a8
+$ cd linux
+$ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig
+$ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc)
+$ cd ..
