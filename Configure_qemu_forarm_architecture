@@ -1,0 +1,1 @@
+qemu-system-aarch64 -machine virt -cpu cortex-a57 -machine type=virt -nographic -smp 1 -m 4096 -kernel ./arch/arm64/boot/Image --append "root=/dev/vda2"  -nographic  -initrd /home/aliak/MYWORKSPACE/busybox/rootfs.img
