@@ -3,3 +3,10 @@ $ cd linux
 $ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig
 $ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc)
 $ cd ..
+
+*install linux kernel modules 
+
+$ make -C /lib/modules/`uname -r`/build M=$PWD modules_install
+
+
+we can use the following option to specify the location where we install the modules
