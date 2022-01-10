@@ -9,4 +9,4 @@ $ cd ..
 $ make -C /lib/modules/`uname -r`/build M=$PWD modules_install
 
 
-we can use the following option to specify the location where we install the modules
+we can use the following option INSTALL_MOD_PATH to specify the location where we install the modules
